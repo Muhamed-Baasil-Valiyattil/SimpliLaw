@@ -1,12 +1,16 @@
-from pydantic import BaseSettings
-from dotenv import load_dotenv
 import os
+import pathlib
+from functools import lru_cache
+from dotenv import load_dotenv
+from pydantic_settings import BaseSettings
 
-load_dotenv()
+basedir = pathlib.Path(__file__).parents[1]
+load_dotenv(basedir / ".env")
+
 class Settings(BaseSettings):
-    secret_key: str = os.getenv("SECRET_KEY")
-    database_url: str = os.getenv("DATABASE_URL")
-    firebase_api_key: str = os.getenv("FIREBASE_API_KEY")
+    app_name: str = "simplilawauth"
+    env: str = os.getenv("ENV", "development")
 
-
-settings = Settings()
+@lru_cache
+def get_settings() -> Settings:
+    return Settings()
