@@ -22,6 +22,10 @@ def get_firebase_user_from_token(
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-@router.get("/auth")
-async def get_userid(user: Annotated[dict, Depends(get_firebase_user_from_token)]):
+@router.get("/status")
+async def auth_status():
+    return {"message": "Authentication service is operational"}
+
+@router.get("/user")
+async def get_user_info(user: Annotated[dict, Depends(get_firebase_user_from_token)]):
     return {"id": user["uid"]}
