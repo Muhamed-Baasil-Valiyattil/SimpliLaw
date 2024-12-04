@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:simplilaw_mobile/auth/loginorregister.dart';
 import 'package:simplilaw_mobile/pages/dashboard.dart';
+import 'package:simplilaw_mobile/pages/startpage.dart';
 
 class AuthGate extends StatelessWidget {
   const AuthGate({super.key});
@@ -16,7 +16,7 @@ class AuthGate extends StatelessWidget {
             if (snapshot.hasData) {
               return const Dashboard();
             } else {
-              return const LoginOrRegister();
+              return const StartPage();
             }
           }),
     );

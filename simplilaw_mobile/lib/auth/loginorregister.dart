@@ -3,7 +3,8 @@ import 'package:simplilaw_mobile/pages/loginpage.dart';
 import 'package:simplilaw_mobile/pages/registerpage.dart';
 
 class LoginOrRegister extends StatefulWidget {
-  const LoginOrRegister({super.key});
+  final bool show;
+  const LoginOrRegister({super.key, required this.show});
 
   @override
   State<LoginOrRegister> createState() => _LoginOrRegisterState();
@@ -11,7 +12,12 @@ class LoginOrRegister extends StatefulWidget {
 
 class _LoginOrRegisterState extends State<LoginOrRegister> {
   // initially show login page
-  bool showLoginPage = true;
+  late bool showLoginPage;
+  @override
+  void initState() {
+    super.initState();
+    showLoginPage = widget.show; // Initialize with the passed value
+  }
 
   void togglePages() {
     setState(() {
