@@ -11,8 +11,8 @@ class AuthService {
         password: password,
       );
       return userCredential;
-    } on FirebaseAuthException catch (e) {
-      throw Exception(e.code);
+    } on FirebaseAuthException {
+      rethrow;
     }
   }
 
@@ -25,8 +25,8 @@ class AuthService {
         password: password,
       );
       return userCredential;
-    } on FirebaseAuthException catch (e) {
-      throw Exception(e.code);
+    } on FirebaseAuthException {
+      rethrow;
     }
   }
 

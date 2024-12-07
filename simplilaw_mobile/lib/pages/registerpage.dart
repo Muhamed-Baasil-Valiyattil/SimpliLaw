@@ -1,7 +1,12 @@
+// ignore_for_file: use_build_context_synchronously
+
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:simplilaw_mobile/auth/authservice.dart';
 import 'package:simplilaw_mobile/components/mybutton.dart';
+import 'package:simplilaw_mobile/components/mysnackbar.dart';
 import 'package:simplilaw_mobile/components/mytextfield.dart';
+import 'package:simplilaw_mobile/pages/home.dart';
 
 class RegisterPage extends StatelessWidget {
   final TextEditingController _emailController = TextEditingController();
@@ -10,27 +15,61 @@ class RegisterPage extends StatelessWidget {
   final void Function()? onTap;
   RegisterPage({super.key, required this.onTap});
 
-  void register(BuildContext context) {
+  Future<void> register(BuildContext context) async {
     final auth = AuthService();
     if (_passwordController.text == _confirmpwController.text) {
       try {
-        auth.signUpWithEmailPassword(
+        await auth.signUpWithEmailPassword(
           _emailController.text,
           _passwordController.text,
         );
+        MySnackBar.show(
+          context,
+          'Account created successfully!',
+          backgroundColor: Colors.green,
+          textColor: Colors.white,
+          icon: Icons.check_circle,
+        );
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => const Dashboard()),
+          (route) => false,
+        );
+      } on FirebaseAuthException catch (e) {
+        String message = '';
+        if (e.code == 'invalid-email') {
+          message = 'Invalid email address.';
+        } else if (e.code == 'weak-password') {
+          message = 'The password provided is too weak.';
+        } else if (e.code == 'email-already-in-use') {
+          message = 'An account already exists with that email.';
+        } else {
+          message = 'Error: ${e.message}';
+        }
+        MySnackBar.show(
+          context,
+          message,
+          backgroundColor: Colors.red,
+          textColor: Colors.white,
+          icon: Icons.error,
+        );
       } catch (e) {
-        showDialog(
-            context: context,
-            builder: (context) => AlertDialog(
-                  title: Text(e.toString()),
-                ));
+        MySnackBar.show(
+          context,
+          "An unexpected error has occured",
+          backgroundColor: Colors.red,
+          textColor: Colors.white,
+          icon: Icons.error,
+        );
       }
     } else {
-      showDialog(
-          context: context,
-          builder: (context) => const AlertDialog(
-                title: Text("Password dont match"),
-              ));
+      MySnackBar.show(
+        context,
+        'Passwords do not match.',
+        backgroundColor: Colors.orange,
+        textColor: Colors.white,
+        icon: Icons.warning,
+      );
     }
   }
 

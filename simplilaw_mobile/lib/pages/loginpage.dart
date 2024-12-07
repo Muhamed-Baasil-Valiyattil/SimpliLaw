@@ -1,9 +1,12 @@
 // ignore_for_file: use_build_context_synchronously
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:simplilaw_mobile/auth/authservice.dart';
 import 'package:simplilaw_mobile/components/mybutton.dart';
+import 'package:simplilaw_mobile/components/mysnackbar.dart';
 import 'package:simplilaw_mobile/components/mytextfield.dart';
+import 'package:simplilaw_mobile/pages/home.dart';
 
 class LoginPage extends StatelessWidget {
   final TextEditingController emailController = TextEditingController();
@@ -18,12 +21,36 @@ class LoginPage extends StatelessWidget {
         emailController.text,
         passwordController.text,
       );
-    } catch (e) {
-      showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-                title: Text(e.toString()),
-              ));
+
+      MySnackBar.show(
+        context,
+        'Login Succes',
+        backgroundColor: Colors.green,
+        textColor: Colors.white,
+        icon: Icons.check_circle,
+      );
+
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => const Dashboard()),
+        (route) => false,
+      );
+    } on FirebaseAuthException catch (e) {
+      String message = '';
+      if (e.code == 'INVALID_LOGIN_CREDENTIALS') {
+        message = 'Invalid login credentials.';
+      } else if (e.code == 'invalid-email') {
+        message = 'Invalid email';
+      } else {
+        message = 'Error: ${e.message}';
+      }
+      MySnackBar.show(
+        context,
+        message,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+        icon: Icons.error,
+      );
     }
   }
 
@@ -50,7 +77,7 @@ class LoginPage extends StatelessWidget {
             const SizedBox(height: 10),
             MyTextField(
               hintText: "Password",
-              obscureText: false,
+              obscureText: true,
               controller: passwordController,
             ),
             const SizedBox(height: 25),
