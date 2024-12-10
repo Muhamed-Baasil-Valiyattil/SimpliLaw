@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:simplilaw_mobile/auth/authservice.dart';
+import 'package:simplilaw_mobile/pages/getsummary.dart';
 import 'package:simplilaw_mobile/pages/startpage.dart';
 
 class Dashboard extends StatelessWidget {
@@ -34,6 +35,14 @@ class Dashboard extends StatelessWidget {
         actions: [
           IconButton(
               onPressed: () => logout(context), icon: const Icon(Icons.logout))
+        ],
+      ),
+      body: Column(
+        children: [
+          TextButton(
+              onPressed: () => Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => const GetSummary())),
+              child: const Text('Next'))
         ],
       ),
     );
