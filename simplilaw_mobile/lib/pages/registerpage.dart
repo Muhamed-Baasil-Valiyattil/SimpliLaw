@@ -112,7 +112,88 @@ class RegisterPage extends StatelessWidget {
               height: 25,
             ),
             MyButton(text: "Register", onTap: () => register(context)),
-            const SizedBox(height: 25),
+            Padding(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 25, vertical: 12.5),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Divider(
+                      thickness: 1,
+                      color: Colors.grey[400],
+                    ),
+                  ),
+                  const Text(
+                    " Or ",
+                    style: TextStyle(color: Colors.grey),
+                  ),
+                  Expanded(
+                    child: Divider(
+                      thickness: 1,
+                      color: Colors.grey[400],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            GestureDetector(
+              onTap: () {
+                try {
+                  AuthService().signInWithGoogle();
+                  MySnackBar.show(
+                    context,
+                    'Login Succes',
+                    backgroundColor: Colors.green,
+                    textColor: Colors.white,
+                    icon: Icons.check_circle,
+                  );
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(builder: (context) => const Dashboard()),
+                    (route) => false,
+                  );
+                } on FirebaseAuthException catch (e) {
+                  String mesg = 'Error: ${e.message}';
+                  MySnackBar.show(
+                    context,
+                    mesg,
+                    backgroundColor: Colors.red,
+                    textColor: Colors.white,
+                    icon: Icons.error,
+                  );
+                }
+              },
+              child: Container(
+                height: 50,
+                constraints: const BoxConstraints(
+                  minWidth: 200,
+                  maxWidth: 250,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.grey[200],
+                  borderRadius: BorderRadius.circular(25),
+                  border: Border.all(color: Colors.white, width: 1),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Image.asset('lib/images/google.png', height: 30),
+                      const SizedBox(width: 10),
+                      const Text(
+                        "Continue with Google",
+                        style: TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.w500),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(
+              height: 20,
+            ),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -123,11 +204,10 @@ class RegisterPage extends StatelessWidget {
                 ),
                 GestureDetector(
                   onTap: onTap,
-                  child: Text(
+                  child: const Text(
                     "Login Now",
                     style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.primary),
+                        fontWeight: FontWeight.bold, color: Colors.blue),
                   ),
                 ),
               ],

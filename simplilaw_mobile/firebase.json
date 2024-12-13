@@ -1,1 +1,25 @@
-{"flutter":{"platforms":{"android":{"default":{"projectId":"simplilawauth","appId":"1:766113113812:android:1cddaa73f74188f4b47d41","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"simplilawauth","configurations":{"android":"1:766113113812:android:1cddaa73f74188f4b47d41","ios":"1:766113113812:ios:e9a18593c5225ea4b47d41","macos":"1:766113113812:ios:e9a18593c5225ea4b47d41","web":"1:766113113812:web:4d2ba9f8ba5b5387b47d41","windows":"1:766113113812:web:287fc292efa48b20b47d41"}}}}}}
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "simplilawauth",
+          "appId": "1:766113113812:android:1cddaa73f74188f4b47d41",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "simplilawauth",
+          "configurations": {
+            "android": "1:766113113812:android:1cddaa73f74188f4b47d41",
+            "ios": "1:766113113812:ios:e9a18593c5225ea4b47d41",
+            "macos": "1:766113113812:ios:e9a18593c5225ea4b47d41",
+            "web": "1:766113113812:web:4d2ba9f8ba5b5387b47d41",
+            "windows": "1:766113113812:web:287fc292efa48b20b47d41"
+          }
+        }
+      }
+    }
+  }
+}
