@@ -1,7 +1,9 @@
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:simplilaw_mobile/auth/firebase_util.dart';
 import 'dart:convert';
+import 'package:simplilaw_mobile/auth/firebase_util.dart';
+import 'package:simplilaw_mobile/components/mysnackbar.dart';
 
 class GetSummary extends StatefulWidget {
   const GetSummary({super.key});
@@ -14,16 +16,22 @@ class _GetSummaryState extends State<GetSummary> {
   final TextEditingController _textController = TextEditingController();
   String? _summary;
   bool _isLoading = false;
+  PlatformFile? _pickedFile;
 
-  Future<void> summarizeText() async {
-    if (_textController.text.isEmpty) {
-      showDialog(
-        context: context,
-        builder: (context) => const AlertDialog(
-          title: Text("Error"),
-          content: Text("Input text cannot be empty."),
-        ),
-      );
+  // Method to pick a file using FilePicker
+  Future<void> _pickFile() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles();
+    if (result != null) {
+      setState(() {
+        _pickedFile = result.files.first;
+      });
+    }
+  }
+
+  // Method to upload the selected file and process it
+  Future<void> _uploadFile() async {
+    if (_pickedFile == null) {
+      MySnackBar.show(context, "No file selected to upload.");
       return;
     }
 
@@ -35,18 +43,31 @@ class _GetSummaryState extends State<GetSummary> {
     try {
       final token = await getFirebaseToken();
 
-      final response =
-          await http.post(Uri.parse('http://127.0.0.1:8000/summarize'),
-              headers: {
-                'Authorization': 'Bearer $token',
-                'Content-Type': 'application/json',
-              },
-              body: json.encode({'text': _textController.text}));
+      // Preparing a multipart request for file upload
+      var request = http.MultipartRequest(
+        'POST',
+        Uri.parse('http://127.0.0.1:8000/upload'),
+      );
+      request.headers.addAll({
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'multipart/form-data',
+      });
+
+      // Using bytes instead of path for web compatibility
+      request.files.add(http.MultipartFile.fromBytes(
+        'file',
+        _pickedFile!.bytes!,
+        filename: _pickedFile!.name,
+      ));
+
+      final response = await request.send();
+      final responseBody = await response.stream.bytesToString();
 
       if (response.statusCode == 200) {
-        final data = json.decode(response.body);
+        final data = json.decode(responseBody);
         final generatedSummary = data['summary'];
 
+        // Displaying the summary character by character
         for (int i = 0; i <= generatedSummary.length; i++) {
           await Future.delayed(const Duration(milliseconds: 25));
           setState(() {
@@ -54,19 +75,65 @@ class _GetSummaryState extends State<GetSummary> {
           });
         }
       } else {
-        throw Exception('Failed to generate summary: ${response.body}');
+        throw Exception('Failed to generate summary: $responseBody');
       }
     } catch (e) {
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text("Error"),
-          content: Text(e.toString()),
-        ),
-      );
+      MySnackBar.show(context, "Error: ${e.toString()}");
     } finally {
       setState(() {
         _isLoading = false;
+        _pickedFile = null;
+      });
+    }
+  }
+
+  // Method to summarize input text
+  Future<void> summarizeText() async {
+    if (_textController.text.isEmpty) {
+      MySnackBar.show(context, "Input text is required.");
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+      _summary = null;
+    });
+
+    try {
+      final token = await getFirebaseToken();
+
+      // Sending a POST request with input text to summarize
+      final response = await http.post(
+        Uri.parse('http://127.0.0.1:8000/summarize'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+        body: json.encode({
+          'text': _textController.text,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        final generatedSummary = data['summary'];
+
+        // Displaying the summary character by character
+        for (int i = 0; i <= generatedSummary.length; i++) {
+          await Future.delayed(const Duration(milliseconds: 25));
+          setState(() {
+            _summary = generatedSummary.substring(0, i);
+          });
+        }
+      } else {
+        throw Exception('Failed to generate summary.');
+      }
+    } catch (e) {
+      MySnackBar.show(context, "Error: ${e.toString()}");
+    } finally {
+      setState(() {
+        _isLoading = false;
+        _textController.clear();
       });
     }
   }
@@ -74,13 +141,77 @@ class _GetSummaryState extends State<GetSummary> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Summarize Text"),
-      ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(20.0),
         child: Column(
           children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        "Upload Documents",
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 17),
+                      ),
+                      Text(
+                        "Format: (.txt, .docx, .pdf)",
+                        style: TextStyle(
+                            color: Theme.of(context).colorScheme.primary),
+                      ),
+                    ],
+                  ),
+                ),
+                if (_pickedFile != null)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    child: Text("Selected File: ${_pickedFile!.name}"),
+                  ),
+                if (_pickedFile == null)
+                  ElevatedButton(
+                    onPressed: _pickFile,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.grey[500],
+                      foregroundColor: Colors.white,
+                    ),
+                    child: const Text("Select File"),
+                  )
+                else
+                  ElevatedButton(
+                    onPressed: _uploadFile,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.black,
+                      foregroundColor: Colors.white,
+                    ),
+                    child: const Text("Upload"),
+                  ),
+              ],
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 25.0),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Divider(
+                      thickness: 2,
+                      color: Colors.grey[400],
+                    ),
+                  ),
+                  const Text(
+                    " OR ",
+                    style: TextStyle(color: Colors.grey),
+                  ),
+                  Expanded(
+                    child: Divider(
+                      thickness: 2,
+                      color: Colors.grey[400],
+                    ),
+                  ),
+                ],
+              ),
+            ),
             Row(
               children: [
                 Expanded(
@@ -95,11 +226,11 @@ class _GetSummaryState extends State<GetSummary> {
                         labelText: "Enter or copy paste text to summarize",
                         border: OutlineInputBorder(),
                       ),
-                      maxLines: null,
+                      maxLines: 5,
                     ),
                   ),
                 ),
-                const SizedBox(width: 5),
+                const SizedBox(width: 10),
                 Container(
                   height: 50,
                   width: 50,

@@ -1,7 +1,7 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart';
+
 import 'package:flutter/material.dart';
 import 'package:simplilaw_mobile/auth/authservice.dart';
 import 'package:simplilaw_mobile/components/mybutton.dart';
@@ -48,6 +48,43 @@ class LoginPage extends StatelessWidget {
       MySnackBar.show(
         context,
         message,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+        icon: Icons.error,
+      );
+    }
+  }
+
+  Future<void> googlelogin(BuildContext context) async {
+    try {
+      await AuthService().signInWithGoogle();
+
+      MySnackBar.show(
+        context,
+        'Login Success',
+        backgroundColor: Colors.green,
+        textColor: Colors.white,
+        icon: Icons.check_circle,
+      );
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => const Dashboard()),
+        (route) => false,
+      );
+    } on FirebaseAuthException catch (e) {
+      String mesg = 'Error: ${e.message}';
+      MySnackBar.show(
+        context,
+        mesg,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+        icon: Icons.error,
+      );
+    } catch (e) {
+      String mesg = e.toString();
+      MySnackBar.show(
+        context,
+        mesg,
         backgroundColor: Colors.red,
         textColor: Colors.white,
         icon: Icons.error,
@@ -114,44 +151,7 @@ class LoginPage extends StatelessWidget {
               height: 25,
             ),
             GestureDetector(
-              onTap: () async {
-                try {
-                  kIsWeb
-                      ? await AuthService().signInWithGoogleForWeb()
-                      : await AuthService().signInWithGoogle();
-
-                  MySnackBar.show(
-                    context,
-                    'Login Success',
-                    backgroundColor: Colors.green,
-                    textColor: Colors.white,
-                    icon: Icons.check_circle,
-                  );
-                  Navigator.pushAndRemoveUntil(
-                    context,
-                    MaterialPageRoute(builder: (context) => const Dashboard()),
-                    (route) => false,
-                  );
-                } on FirebaseAuthException catch (e) {
-                  String mesg = 'Error: ${e.message}';
-                  MySnackBar.show(
-                    context,
-                    mesg,
-                    backgroundColor: Colors.red,
-                    textColor: Colors.white,
-                    icon: Icons.error,
-                  );
-                } catch (e) {
-                  String mesg = e.toString();
-                  MySnackBar.show(
-                    context,
-                    mesg,
-                    backgroundColor: Colors.red,
-                    textColor: Colors.white,
-                    icon: Icons.error,
-                  );
-                }
-              },
+              onTap: () => googlelogin(context),
               child: Container(
                 height: 50,
                 constraints: const BoxConstraints(
