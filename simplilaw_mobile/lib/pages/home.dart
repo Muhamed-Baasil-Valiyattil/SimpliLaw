@@ -45,7 +45,7 @@ class _DashboardState extends State<Dashboard> {
     ];
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Home"),
+        title: Icon(Icons.pages),
         actions: [
           IconButton(
               onPressed: () => logout(context), icon: const Icon(Icons.logout))
