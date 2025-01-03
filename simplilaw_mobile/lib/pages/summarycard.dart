@@ -78,8 +78,37 @@ class _SummaryCardState extends State<SummaryCard> {
                 children: [
                   // Close Button
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
+                      Row(
+                        children: [
+                          IconButton(
+                            onPressed: () {
+                              Clipboard.setData(
+                                  ClipboardData(text: widget.summaryText));
+
+                              MySnackBar.show(
+                                context,
+                                "Copied to clipboard",
+                                backgroundColor: Colors.black,
+                                icon: Icons.copy_outlined,
+                              );
+                            },
+                            icon: const Icon(Icons.copy),
+                          ),
+                          IconButton(
+                            onPressed: _downloadAsPDF,
+                            icon: const Icon(Icons.picture_as_pdf),
+                          ),
+                          IconButton(
+                            onPressed: () {
+                              Share.share(widget.summaryText,
+                                  subject: "Generated Summary");
+                            },
+                            icon: const Icon(Icons.share),
+                          ),
+                        ],
+                      ),
                       IconButton(
                         onPressed: widget.onClose,
                         icon: const Icon(Icons.close),
@@ -90,59 +119,29 @@ class _SummaryCardState extends State<SummaryCard> {
                   // Scrollable Content
                   Expanded(
                     child: SingleChildScrollView(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            "Input Text:",
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          Text(widget.inputText),
-                          const Divider(),
-                          const Text(
-                            "Summary:",
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          Text(widget.summaryText),
-                        ],
+                      child: Padding(
+                        padding: const EdgeInsets.all(10.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              "Input Text:",
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            Text(widget.inputText),
+                            const Divider(),
+                            const Text(
+                              "Summary:",
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            Text(widget.summaryText),
+                          ],
+                        ),
                       ),
                     ),
                   ),
 
                   // Quick Actions
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      ElevatedButton.icon(
-                        onPressed: () {
-                          Clipboard.setData(
-                              ClipboardData(text: widget.summaryText));
-
-                          MySnackBar.show(
-                            context,
-                            "Copied to clipboard",
-                            backgroundColor: Colors.black,
-                            icon: Icons.copy_outlined,
-                          );
-                        },
-                        icon: const Icon(Icons.copy),
-                        label: const Text("Copy"),
-                      ),
-                      ElevatedButton.icon(
-                        onPressed: _downloadAsPDF,
-                        icon: const Icon(Icons.picture_as_pdf),
-                        label: const Text("Download PDF"),
-                      ),
-                      ElevatedButton.icon(
-                        onPressed: () {
-                          Share.share(widget.summaryText,
-                              subject: "Generated Summary");
-                        },
-                        icon: const Icon(Icons.share),
-                        label: const Text("Share"),
-                      ),
-                    ],
-                  ),
                 ],
               ),
             ),

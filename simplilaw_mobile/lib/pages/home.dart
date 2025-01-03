@@ -44,6 +44,7 @@ class _DashboardState extends State<Dashboard> {
       const SettingsPage(), // Settings
     ];
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         title: Icon(Icons.pages),
         actions: [

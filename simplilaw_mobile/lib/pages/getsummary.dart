@@ -1,9 +1,14 @@
+import 'dart:io';
+
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:simplilaw_mobile/auth/firebase_util.dart';
 import 'package:simplilaw_mobile/components/mysnackbar.dart';
+
+// Dynamic backend URL
+const String backendUrl = "https://formerly-smashing-mastodon.ngrok-free.app";
 
 class GetSummary extends StatefulWidget {
   const GetSummary({super.key});
@@ -46,19 +51,35 @@ class _GetSummaryState extends State<GetSummary> {
       // Preparing a multipart request for file upload
       var request = http.MultipartRequest(
         'POST',
-        Uri.parse('http://127.0.0.1:8000/upload'),
+        Uri.parse('$backendUrl/upload'),
       );
       request.headers.addAll({
         'Authorization': 'Bearer $token',
         'Content-Type': 'multipart/form-data',
       });
 
-      // Using bytes instead of path for web compatibility
-      request.files.add(http.MultipartFile.fromBytes(
-        'file',
-        _pickedFile!.bytes!,
-        filename: _pickedFile!.name,
-      ));
+      // // Using bytes instead of path for web compatibility
+      // request.files.add(http.MultipartFile.fromBytes(
+      //   'file',
+      //   _pickedFile!.bytes!,
+      //   filename: _pickedFile!.name,
+      // ));
+      if (_pickedFile!.bytes != null) {
+        // Web: Use bytes
+        request.files.add(http.MultipartFile.fromBytes(
+          'file',
+          _pickedFile!.bytes!,
+          filename: _pickedFile!.name,
+        ));
+      } else {
+        // Mobile/Desktop: Use file path and stream
+        request.files.add(http.MultipartFile(
+          'file',
+          File(_pickedFile!.path!).openRead(),
+          _pickedFile!.size,
+          filename: _pickedFile!.name,
+        ));
+      }
 
       final response = await request.send();
       final responseBody = await response.stream.bytesToString();
@@ -104,7 +125,7 @@ class _GetSummaryState extends State<GetSummary> {
 
       // Sending a POST request with input text to summarize
       final response = await http.post(
-        Uri.parse('http://127.0.0.1:8000/summarize'),
+        Uri.parse('$backendUrl/summarize'),
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
@@ -141,6 +162,7 @@ class _GetSummaryState extends State<GetSummary> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
